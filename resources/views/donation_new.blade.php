@@ -1,4 +1,4 @@
-@extends('header')
+@extends('layouts.app')
 @section('content') 
 
  <center> <h2 id="headline"><b>Register new agent</b></h2> </center>
@@ -11,7 +11,7 @@
   <form action="/donation_insert">
  <table class="table table-striped table-bordered table-hover table-checkable order-column valign-middle" id="example4">
 	<thead>
-        <tr colspan="2">   <th> Enter new donation details </th>   </tr> 
+        <tr>   <th colspan="2"> Enter new donation details </th>   </tr> 
 
     <tbody> 
     	<tr>  <td><label for="donor"> Name of donor</label></td> <td> <input type="text" name="donor"> </td>  </tr>

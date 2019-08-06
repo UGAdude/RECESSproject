@@ -10,9 +10,9 @@
 #include <time.h>
 #include <pthread.h>
 #include <netdb.h>
-//#include <mariadb/mysql.h>
-//#include <mariadb/server/mysql.h>
-#define PORT 5000
+#include <mariadb/mysql.h>
+#include <mariadb/server/mysql.h>
+#define PORT 5015
 #define BUFSIZE 1024
 
 //Compilation : $ gcc -o server server.c `/opt/lampp/bin/mysql_config --cflags --libs`
@@ -98,19 +98,18 @@ void new_recv(int i, fd_set *master, int sockfd, int fdmax,struct sockaddr_in my
 	      //assign time recieved : 
 	      //strcpy(s_memberob.timerecv,((char *)t));
 	
-	                                                         if(headerprinted==0){
-	//printf("\nmember_name |  gender  | recommender |  Date    |   Time |");
+	                                                         if(headerprinted==0){ 
 	printf("\n============================================================="); headerprinted=1;
 	                                                            }
 	     //access all the fields of the recieved object from s_memberob
-	     printf("\nReceived request --------------------------------------");
+	     printf("\n================================================");
 	     printf("\n%s\nFrom agent : %s\nDistrict : %s\n",s_memberob.messageStr,s_memberob.agentUsername,s_memberob.agentDistrict);
-	     
-	     /* /*********for debuging purposes********** 
+	      
+	      /*/ ********for debuging purposes********** 
 	     printf("\n==========received=====\n messageStr : ------- %s -----\n memberName: -------- %s -----\n memberID : --------- %s -----\n enrollmentDate: ---- %s -----\n memberRecommender: - %s -----\n memberGender : ----- %s -----\n agentUsername: ----- %s -----\n agentDistrict : ---- %s -----\n recommendedMembers : %d -----\n agentSignature : --------- %s -----\n portNo : ----------- %d -----\n daterecv : --------- %s -----\n timerecv : --------- %s -----\n======================",
 	     		s_memberob.messageStr,s_memberob.memberName,s_memberob.memberID,s_memberob.enrollmentDate,s_memberob.memberRecommender,s_memberob.memberGender,s_memberob.agentUsername,s_memberob.agentDistrict,s_memberob.recommendedMembers,s_memberob.agentSignature,s_memberob.portNo,s_memberob.daterecv,s_memberob.timerecv );
-	     */ //*********for debuging purposes**********
-	     
+	      // *********for debuging purposes**********
+	     */
   }  }//...............................end of new_recv() function.......................................
 		
 void connection_accept(fd_set *master, int *fdmax, int sockfd, struct sockaddr_in *client_addr)
@@ -136,7 +135,7 @@ void connect_request(int *sockfd, struct sockaddr_in *my_addr)
 	if ((*sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
 		perror("Socket"); exit(1); } 
 	my_addr->sin_family = AF_INET;
-	my_addr->sin_port = htons(5000);
+	my_addr->sin_port = htons(5015);
 	my_addr->sin_addr.s_addr = INADDR_ANY;
 	memset(my_addr->sin_zero, ' ', sizeof my_addr->sin_zero);
 		
@@ -146,7 +145,7 @@ void connect_request(int *sockfd, struct sockaddr_in *my_addr)
 	if (bind(*sockfd, (struct sockaddr *)my_addr, sizeof(struct sockaddr)) == -1) {
 		perror("Unable to bind"); exit(1); }
 	if (listen(*sockfd, 10) == -1) { perror("listen"); exit(1); }
-	printf("\nServer Waiting for client on port 5000 .....");
+	printf("\nServer Waiting for client on port 5015 .....");
 	fflush(stdout);
 }
 
@@ -176,8 +175,7 @@ int main(){
 					new_recv(i, &master, sockfd, fdmax,my_addr, client_addr);
 			 }
 		}//end for loop
-	//******************************* processing ******************************** 
-		  //*********=======calling main processor to process========************  
+		//******************************* processing ***************************  
 			  ret_structr = mainproc(s_memberob);
 			  
 			  strcpy(ret_structr.agentUsername,s_memberob.agentUsername);
@@ -187,7 +185,7 @@ int main(){
 		      for (jjn = 0; jjn <= fdmax; jjn++){ 
 			       send_to_all(jjn, sockfd, ret_structr, &master ); 
 		       } bbzero(ret_structr.messageStr); bbzero(ret_structr.agentUsername);
-		  //********************************************	
+		//*********************************************************************	
 	}//end while(1)
 	 
 	return 0;
@@ -252,8 +250,8 @@ struct member addmproc(struct member mainmemberob){
 		FILE *statusfp;
 		int rows_affected,n=0,i,signature_not_exists=0;
 		char querr1[500],querr2[500],querr2b[500],querr3[100],entered_signature[2],sign_auth_passed[4];
-		char signatr[4],signaturesymbol[30],signaturentered[30],memberIDvar[30];
-		char strtoken1[15],strtoken2[15],strtoken3[15],recommendertoken6[30],gendertoken5[30],datetoken4[30];
+		char signatr[4],signaturesymbol[30],entered_symbol[30],memberIDvar[30];
+		char strtoken1[15],strtoken2[15],strtoken3[15],recommendertoken6[30],created_at[30],gendertoken5[30],datetoken4[30];
 		 strcpy(strtoken1 , strtok(mainmemberob.messageStr, " ")); 
 		 strcpy(strtoken2 , strtok(NULL, " ")); //first name
 		 strcpy(strtoken3 , strtok(NULL, " ")); //second name
@@ -283,31 +281,31 @@ struct member addmproc(struct member mainmemberob){
 		if(!(mysql_real_connect(aconn2,host,user,pass,dbname,mysqlport,unix_socket,flag))){ fprintf(stderr,"Error !! : %s\n",mysql_error(aconn2) ); 
 		}else{  printf("\n Authenticating the signature ... '%s'",mainmemberob.agentSignature); } 
 	  	if(!strcmp(mainmemberob.agentSignature,"010101111101101")){ strcpy(entered_signature,"A");
-	  	strcpy(signaturentered," * * ***** ** *");
+	  	strcpy(entered_symbol," * * ***** ** *");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"110101110101110")){ strcpy(entered_signature,"B");
-	  	strcpy(signaturentered,"** * *** * *** ");
+	  	strcpy(entered_symbol,"** * *** * *** ");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"011100100100011")){ strcpy(entered_signature,"C");
-	  	strcpy(signaturentered," ***  *  *   **");
+	  	strcpy(entered_symbol," ***  *  *   **");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"110101101101110")){ strcpy(entered_signature,"D");
-	  	strcpy(signaturentered,"** * ** ** *** ");
+	  	strcpy(entered_symbol,"** * ** ** *** ");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"111100111100111")){ strcpy(entered_signature,"E");
-	  	strcpy(signaturentered,"****  ****  ***");
+	  	strcpy(entered_symbol,"****  ****  ***");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"111100111100100")){ strcpy(entered_signature,"F");
-	  	strcpy(signaturentered,"****  ****  *  ");
+	  	strcpy(entered_symbol,"****  ****  *  ");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"011100101101011")){ strcpy(entered_signature,"G");
-	  	strcpy(signaturentered," ***  * ** * **");
+	  	strcpy(entered_symbol," ***  * ** * **");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"101101111101101")){ strcpy(entered_signature,"H");
-	  	strcpy(signaturentered,"* ** ***** ** *");
+	  	strcpy(entered_symbol,"* ** ***** ** *");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"111010010010111")){ strcpy(entered_signature,"I");
-	  	strcpy(signaturentered,"*** *  *  * ***");
+	  	strcpy(entered_symbol,"*** *  *  * ***");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"111001001101111")){ strcpy(entered_signature,"J");
-	  	strcpy(signaturentered,"***  *  ** ****");
+	  	strcpy(entered_symbol,"***  *  ** ****");
 	  	}else if(!strcmp(mainmemberob.agentSignature,"100100100100111")){ strcpy(entered_signature,"L");
-	  	strcpy(signaturentered,"*  *  *  *  ***");
+	  	strcpy(entered_symbol,"*  *  *  *  ***");
 	  	}else{strcpy(entered_signature,"X"); } 
 	  	sprintf(querr3,"SELECT signatre FROM agents where agentUsername like '%c%c%c%c%c' and signatre='%s' limit 1",mainmemberob.agentUsername[0],mainmemberob.agentUsername[1],mainmemberob.agentUsername[2],mainmemberob.agentUsername[3],'%',entered_signature); 
-	  	printf("\n query: = %s ",querr3);
-	  	if(!mysql_query(aconn2,querr3)){printf(" .............Ok . ");}else{printf(" .............Failed . "); }  
+	  	 
+	  	 if(!mysql_query(aconn2,querr3)){printf(" .............Ok . ");}else{printf(" .............Failed . "); }  
 	  	rset2 = mysql_store_result(aconn2);  
 		while((row = mysql_fetch_row(rset2))!=NULL){sprintf(&signatr[0],"%c",row[0][0]); signature_not_exists++; }
 		mysql_free_result(rset2);  
@@ -316,9 +314,9 @@ struct member addmproc(struct member mainmemberob){
 		  
 		// organising the signature into a desired format
 		for(i=0;i<strlen(mainmemberob.agentSignature);i++){ 
-			sprintf(&signaturesymbol[i+n],"%c",signaturentered[i]);
-			if((i+1)%3==0){ sprintf(&signaturesymbol[i+n+1],"%c",'\n'); n=n+1; }
- 		}//finished organising the signature into a desired format
+			sprintf(&signaturesymbol[i+n],"%c",entered_symbol[i]);
+			if((i+1)%3==0){ sprintf(&signaturesymbol[i+n+1],"%c",'\n'); n=n+1; } 
+ 		} //finished organising the signature into a desired format 
  		
 		if(strcmp(entered_signature,"X")){ 
 			if(!signature_not_exists){ 
@@ -328,21 +326,22 @@ struct member addmproc(struct member mainmemberob){
 				 //write message string to the file members.txt
 			 	mbrsfile = fopen("storage/app/members.txt","a");
 			 	fprintf(mbrsfile,"%c--------------------------------------",'\n');
-				fprintf(mbrsfile,"%c%s: %s%cBy agent : %sDistrict : %sSignature authentication passed ? .............%s%c",'\n',"Failed to add member",mainmemberob.memberName,'\n',mainmemberob.agentUsername,mainmemberob.agentDistrict,sign_auth_passed,'\n');
+				fprintf(mbrsfile,"%c%s: %s%cBy agent : %sDistrict : %sSignature authentication passed ? %s%c",'\n',"Failed to add member",mainmemberob.memberName,'\n',mainmemberob.agentUsername,mainmemberob.agentDistrict,sign_auth_passed,'\n');
 			   	fclose(mbrsfile); 
 			}else{  
 				if(!(mysql_real_connect(aconn,host,user,pass,dbname,mysqlport,unix_socket,flag))){ 
 					fprintf(stderr,"Error !! : %s\n",mysql_error(aconn) ); printf("\n !! Problem occured while trying to add member: '%s' .",mainmemberob.memberName); 
 				}else{  printf("\n Adding member ... %s",mainmemberob.memberName); } 
-			  	sprintf(querr2,"INSERT INTO members set memberName='%s', memberID='%s', enrollmentDate='%s', memberRecommender='%s',memberGender='%s',enrolledBy='%s',districtName='%s',recommendedMembers='%d'",mainmemberob.memberName,mainmemberob.memberID,mainmemberob.enrollmentDate,mainmemberob.memberRecommender,mainmemberob.memberGender,mainmemberob.agentUsername,mainmemberob.agentDistrict,0);   
-			  	if(!mysql_query(aconn,(querr2))){printf(".........Ok .");}else{printf("..............Failed");};  
+			  	sprintf(created_at,"%s%s",mainmemberob.enrollmentDate," 00:00:00");
+			  	sprintf(querr2,"INSERT INTO members set memberName='%s', memberID='%s', enrollmentDate='%s', memberRecommender='%s',memberGender='%s',enrolledBy='%s',districtName='%s',recommendedMembers='%d',created_at='%s'",mainmemberob.memberName,mainmemberob.memberID,mainmemberob.enrollmentDate,mainmemberob.memberRecommender,mainmemberob.memberGender,mainmemberob.agentUsername,mainmemberob.agentDistrict,0,created_at);   
+			  	if(!mysql_query(aconn,(querr2))){printf("....Ok .");}else{printf("......Failed");};  
 			  	sprintf(querr2b,"UPDATE districts set no_of_members=(no_of_members+1) where districtName like '%c%c%c%c%c'",mainmemberob.agentDistrict[0],mainmemberob.agentDistrict[1],mainmemberob.agentDistrict[2],mainmemberob.agentDistrict[3],'%'); 
 			  	rows_affected=mysql_query(aconn,(querr2b));
 			  	mysql_close(aconn); // first close the connection to db
 			  	//-------
 				puts("\n Writing signature to a file ... .............................Ok .");  
 			  	asgnsfile = fopen("storage/app/signitures.txt","a");   
-			  	fprintf(asgnsfile,"%s %c______%s____Added member %s%c",signaturesymbol,'\n',mainmemberob.agentUsername,mainmemberob.memberName,'\n'); //write signiture symbols to the file signitures.txt
+			  	fprintf(asgnsfile,"%s %c%sAdded member %s%c",signaturesymbol,'\n',mainmemberob.agentUsername,mainmemberob.memberName,'\n'); //write signiture symbols to the file signitures.txt
 			  	fclose(asgnsfile);
 			  	strcpy(sign_auth_passed,"Yes");
 			  	

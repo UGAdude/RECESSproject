@@ -83,11 +83,24 @@ FILE *fileptr;
 		                		fclose(fileptr);
 		                		//first sign
 		                		//Signing: prompting 15 times in a loop
-								printf("Provide your 15 character signiture to continue\n");
+								printf("\n================\nProvide your 15 character signiture to continue\n");
 								for(i=0;i<15;i++){ printf("\n symbol %d : ",i+1); sgniture[i]=getchar(); getchar(); } 
-								printf("\n sgniture := %s",sgniture);
 								strcpy(memberob.agentSignature,sgniture);
-		                		send(sockfd,&memberob,sizeof(memberob),0);  
+										  if(!strcmp(memberob.agentSignature,"010101111101101")){ printf("\n * \n* *\n***\n* *\n* *\n"); //A
+									}else if(!strcmp(memberob.agentSignature,"110101110101110")){  printf("\n** \n* *\n** \n* *\n** \n"); //B
+									}else if(!strcmp(memberob.agentSignature,"011100100100011")){  printf("\n **\n*  \n*  \n*  \n **\n"); //C
+									}else if(!strcmp(memberob.agentSignature,"110101101101110")){  printf("\n** \n* *\n* *\n* *\n** \n"); //D
+									}else if(!strcmp(memberob.agentSignature,"111100111100111")){  printf("\n***\n*  \n***\n*  \n***\n"); //E
+									}else if(!strcmp(memberob.agentSignature,"111100111100100")){  printf("\n***\n*  \n***\n*  \n*  \n"); //F
+									}else if(!strcmp(memberob.agentSignature,"011100101101011")){  printf("\n **\n*  \n* *\n* *\n **\n"); //G
+									}else if(!strcmp(memberob.agentSignature,"101101111101101")){  printf("\n* *\n* *\n***\n* *\n* *\n"); //H
+									}else if(!strcmp(memberob.agentSignature,"111010010010111")){  printf("\n***\n * \n * \n * \n***\n"); //I
+									}else if(!strcmp(memberob.agentSignature,"111001001101111")){  printf("\n***\n  *\n  *\n* *\n***\n"); //J
+									}else if(!strcmp(memberob.agentSignature,"100100100100111")){  printf("\n*  \n*  \n*  \n*  \n***\n"); //L
+									}else{ printf("\n*** unknwn signature ***\n"); }  
+									
+				            		send(sockfd,&memberob,sizeof(memberob),0); 
+				            		strcpy(memberob.agentSignature,""); 
 		                	}else{  
 		                		printf("File '%s' not found in the working directory !!",filenamee);
 		                	}
@@ -97,16 +110,28 @@ FILE *fileptr;
 				            printf("\nEnter the recommender ID or 'none' : \t");
 				            fgets(recommenderVar,sizeof(recommenderVar),stdin); 
 				            strcpy(memberob.memberRecommender,recommenderVar);
-				        	sprintf(memberIDvar,"%c%c%c%d%d%ld",districtName[0],districtName[1],districtName[2],0,mbrno,(time(NULL)%1000)); mbrno++;
+				        	sprintf(memberIDvar,"%c%c%c%d%d%d",districtName[0],districtName[1],districtName[2],0,mbrno,(time(NULL)%1000)); mbrno++;
 				        	strcpy(memberob.memberID,memberIDvar);
 						    strcpy(memberob.messageStr,commandList); 
 						    //first sign
 						    //Signing: prompting 15 times in a loop
 						    printf("Provide your 15 character signiture to continue\n");
 						    for(i=0;i<15;i++){ printf("\n symbol %d : ",i+1); sgniture[i]=getchar(); getchar(); } 
-						    printf("\n sgniture := %s",sgniture);
-						    strcpy(memberob.agentSignature,sgniture);
-						    send(sockfd,&memberob,sizeof(memberob),0); 
+						    strcpy(memberob.agentSignature,sgniture); 
+									  if(!strcmp(memberob.agentSignature,"010101111101101")){  printf("\n * \n* *\n***\n* *\n* *\n"); //A
+								}else if(!strcmp(memberob.agentSignature,"110101110101110")){  printf("\n** \n* *\n** \n* *\n** \n"); //B
+								}else if(!strcmp(memberob.agentSignature,"011100100100011")){  printf("\n **\n*  \n*  \n*  \n **\n"); //C
+								}else if(!strcmp(memberob.agentSignature,"110101101101110")){  printf("\n** \n* *\n* *\n* *\n** \n"); //D
+								}else if(!strcmp(memberob.agentSignature,"111100111100111")){  printf("\n***\n*  \n***\n*  \n***\n"); //E
+								}else if(!strcmp(memberob.agentSignature,"111100111100100")){  printf("\n***\n*  \n***\n*  \n*  \n"); //F
+								}else if(!strcmp(memberob.agentSignature,"011100101101011")){  printf("\n **\n*  \n* *\n* *\n **\n"); //G
+								}else if(!strcmp(memberob.agentSignature,"101101111101101")){  printf("\n* *\n* *\n***\n* *\n* *\n"); //H
+								}else if(!strcmp(memberob.agentSignature,"111010010010111")){  printf("\n***\n * \n * \n * \n***\n"); //I
+								}else if(!strcmp(memberob.agentSignature,"111001001101111")){  printf("\n***\n  *\n  *\n* *\n***\n"); //J
+								}else if(!strcmp(memberob.agentSignature,"100100100100111")){  printf("\n*  \n*  \n*  \n*  \n***\n"); //L
+								}else{ printf("*** unknwn signature ***"); }   
+								send(sockfd,&memberob,sizeof(memberob),0); 
+								strcpy(memberob.agentSignature,"");
 				        }//end of if else  
 				     }else{
 				     	strcpy(memberob.messageStr,commandList); 
@@ -131,7 +156,7 @@ void connect_request(int *sockfd, struct sockaddr_in *server_addr)
 		exit(1);
 	}
 	server_addr->sin_family = AF_INET;
-	server_addr->sin_port = htons(5000);
+	server_addr->sin_port = htons(5015);
 	server_addr->sin_addr.s_addr = inet_addr("127.0.0.1");
 	memset(server_addr->sin_zero, ' ', sizeof server_addr->sin_zero);
 	
@@ -155,7 +180,13 @@ int main(){
         FD_SET(0, &master);
         FD_SET(sockfd, &master);
 	fdmax = sockfd;
-	 
+	 printf("AVAILABLE COMMANDS : \n%s\n%s\n%s\n%s\n%s\n",
+	"\t'Addmember member_name date gender recommender '",
+	"\t'Addmember file_input.txt '",  /*eg. Addmember file_members.txt      */
+	"\tCheck_status",	  			/*To check status of the file*/
+	"\tget_statement",  			/*To check statement of payments for the logged in user*/
+	"\tSearch criteria eg. \"Search memberName like 'Jimm%' \" or \"Search enrollmentDate='2019-05-15' \" " 	 
+	);
 	printf("\nWHAT IS YOUR DISTRICT ? : \t"); //scanf("%s",districtName); 
 		fgets(districtName,sizeof(districtName),stdin);
 	printf("\nWHAT IS YOUR USERNAME ? : \t"); //scanf("%s",agentUser);

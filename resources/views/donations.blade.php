@@ -1,4 +1,4 @@
-@extends('header')
+@extends('layouts.app')
 @section('content') 
  
  <center> <h2 id="headline"><b>Donations </b></h2> </center> 

@@ -35,6 +35,10 @@ class agentsController extends Controller
                		}else{$agtable->agentHead=false; $agtable->wageUnits=4; } 
 				    
 			     $agtable->save(); 
+			     	$namme = $request->input('agentname'); 
+			     	$fname = explode(' ',$namme)[0]; 
+			     	$rowaffectedx = DB::table('members')->where('memberRecommender','like',$fname.'%')->update(['memberRecommender'=>'xxxxxxx']); 
+			     	
 			     	if($agtable->agentHead==true){$rowaffected = DB::table('districts')->where('districtName',$distr_name)->update(['headAgent'=>$uname]);}       
                		$rowaffected = DB::table('districts')->where('districtName',$distr_name)->update(['no_of_agents'=>($agents_at_dist+1)]);  
                		
